@@ -1,13 +1,18 @@
+
+// TODOアプリの主要DOM要素
 const form = document.getElementById("todo-form");
 const input = document.getElementById("todo-input");
 const list = document.getElementById("todo-list");
 const clearCompletedButton = document.getElementById("clear-completed");
 
+// localStorageで使うキー
 const STORAGE_KEY = "simple-todo-items";
 
+// 初期表示: 保存済みTODOを読み込み、描画
 let todos = loadTodos();
 render();
 
+// TODO追加
 form.addEventListener("submit", (event) => {
   event.preventDefault();
 
@@ -26,12 +31,15 @@ form.addEventListener("submit", (event) => {
   persistAndRender();
 });
 
+// 完了済みTODOの一括削除
 clearCompletedButton.addEventListener("click", () => {
   todos = todos.filter((todo) => !todo.completed);
   persistAndRender();
 });
 
+// 現在のtodos配列をDOMへ反映
 function render() {
+  // 毎回全件描画し直すため、まず一覧を空にする
   list.textContent = "";
 
   for (const todo of todos) {
@@ -43,6 +51,7 @@ function render() {
 
     const label = document.createElement("label");
 
+    // 完了チェックの切り替え
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.checked = todo.completed;
@@ -54,6 +63,7 @@ function render() {
     const span = document.createElement("span");
     span.textContent = todo.text;
 
+    // 個別削除ボタン
     const deleteButton = document.createElement("button");
     deleteButton.type = "button";
     deleteButton.className = "delete-btn";
@@ -69,17 +79,20 @@ function render() {
   }
 }
 
+// 保存して再描画する共通処理
 function persistAndRender() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
   render();
 }
 
+// localStorageからTODOを読み込む
 function loadTodos() {
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
     return [];
   }
 
+  // 破損データや想定外形式でも落ちないように防御的に処理
   try {
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
