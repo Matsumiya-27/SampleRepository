@@ -57,6 +57,23 @@ button:hover {
   filter: brightness(0.95);
 }
 
+
+.filters {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.filter-btn {
+  background: #e5e7eb;
+  color: #1f2937;
+}
+
+.filter-btn.active {
+  background: #2563eb;
+  color: #fff;
+}
+
 .todo-list {
   list-style: none;
   padding: 0;
@@ -114,5 +131,15 @@ button:hover {
     background: #111827;
     border-color: #374151;
     color: #f9fafb;
+  }
+
+  .filter-btn {
+    background: #374151;
+    color: #e5e7eb;
+  }
+
+  .filter-btn.active {
+    background: #3b82f6;
+    color: #fff;
   }
 }

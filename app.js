@@ -1,12 +1,15 @@
-
 // TODOアプリの主要DOM要素
 const form = document.getElementById("todo-form");
 const input = document.getElementById("todo-input");
 const list = document.getElementById("todo-list");
 const clearCompletedButton = document.getElementById("clear-completed");
+const filterButtons = document.querySelectorAll(".filter-btn");
 
 // localStorageで使うキー
 const STORAGE_KEY = "simple-todo-items";
+
+// 表示中のフィルター状態（all / active / completed）
+let currentFilter = "all";
 
 // 初期表示: 保存済みTODOを読み込み、描画
 let todos = loadTodos();
@@ -37,12 +40,34 @@ clearCompletedButton.addEventListener("click", () => {
   persistAndRender();
 });
 
+// フィルターボタンのクリックで、表示対象を切り替える
+for (const button of filterButtons) {
+  button.addEventListener("click", () => {
+    currentFilter = button.dataset.filter;
+    updateFilterButtonState();
+    render();
+  });
+}
+
 // 現在のtodos配列をDOMへ反映
 function render() {
   // 毎回全件描画し直すため、まず一覧を空にする
   list.textContent = "";
 
-  for (const todo of todos) {
+  // 現在フィルターに一致するTODOだけ表示する
+  const visibleTodos = todos.filter((todo) => {
+    if (currentFilter === "active") {
+      return !todo.completed;
+    }
+
+    if (currentFilter === "completed") {
+      return todo.completed;
+    }
+
+    return true;
+  });
+
+  for (const todo of visibleTodos) {
     const item = document.createElement("li");
     item.className = "todo-item";
     if (todo.completed) {
@@ -76,6 +101,14 @@ function render() {
     label.append(checkbox, span);
     item.append(label, deleteButton);
     list.append(item);
+  }
+}
+
+// フィルターボタンの見た目（activeクラス）を同期する
+function updateFilterButtonState() {
+  for (const button of filterButtons) {
+    const isSelected = button.dataset.filter === currentFilter;
+    button.classList.toggle("active", isSelected);
   }
 }
 
