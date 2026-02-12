@@ -175,6 +175,41 @@ button:active {
 }
 
 
+.fireworks-layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 20;
+  overflow: hidden;
+}
+
+.firework-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 10px currentColor;
+  animation: firework-burst var(--duration, 1200ms) ease-out forwards;
+}
+
+@keyframes firework-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.3);
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-50% + var(--dy, 0px))) scale(0.9);
+  }
+}
+
+
 @keyframes rotate-colors {
   from {
     transform: rotate(0deg) scale(1.05);
