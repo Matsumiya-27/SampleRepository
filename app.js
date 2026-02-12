@@ -11,9 +11,6 @@ const STORAGE_KEY = "simple-todo-items";
 // 表示中のフィルター状態（all / active / completed）
 let currentFilter = "all";
 
-// 直前フレームで「全件完了」だったかどうか（花火の連続発火を防ぐ）
-let wasAllCompleted = false;
-
 // 初期表示: 保存済みTODOを読み込み、描画
 let todos = loadTodos();
 render();
@@ -39,8 +36,20 @@ form.addEventListener("submit", (event) => {
 
 // 完了済みTODOの一括削除
 clearCompletedButton.addEventListener("click", () => {
-  todos = todos.filter((todo) => !todo.completed);
+  // 削除前に「全件完了状態か」を覚えておき、削除完了時の演出条件に使う
+  const hadTodos = todos.length > 0;
+  const wereAllCompleted = hadTodos && todos.every((todo) => todo.completed);
+
+  const remainingTodos = todos.filter((todo) => !todo.completed);
+  const removedCount = todos.length - remainingTodos.length;
+  todos = remainingTodos;
+
   persistAndRender();
+
+  // 「全件完了→完了を削除できた」タイミングで花火を打ち上げる
+  if (wereAllCompleted && removedCount > 0) {
+    launchFireworks();
+  }
 });
 
 // フィルターボタンのクリックで、表示対象を切り替える
@@ -105,9 +114,6 @@ function render() {
     item.append(label, deleteButton);
     list.append(item);
   }
-
-  // 全TODOが完了した瞬間にだけ花火を表示する
-  maybeLaunchFireworks();
 }
 
 // フィルターボタンの見た目（activeクラス）を同期する
@@ -118,46 +124,41 @@ function updateFilterButtonState() {
   }
 }
 
-// 全完了状態への遷移を検知して花火を打ち上げる
-function maybeLaunchFireworks() {
-  const hasTodos = todos.length > 0;
-  const isAllCompleted = hasTodos && todos.every((todo) => todo.completed);
-
-  if (isAllCompleted && !wasAllCompleted) {
-    launchFireworks();
-  }
-
-  wasAllCompleted = isAllCompleted;
-}
-
-// 画面上に簡易花火パーティクルを生成する
+// 画面上に派手めな花火パーティクルを生成する
 function launchFireworks() {
   const layer = document.createElement("div");
   layer.className = "fireworks-layer";
 
-  const colorPalette = ["#f472b6", "#22d3ee", "#facc15", "#34d399", "#a78bfa", "#fb7185"];
+  const colorPalette = ["#f472b6", "#22d3ee", "#facc15", "#34d399", "#a78bfa", "#fb7185", "#fb923c"];
 
-  // 花火の中心を複数作って、各中心から粒を拡散させる
-  for (let burstIndex = 0; burstIndex < 4; burstIndex += 1) {
-    const originX = 12 + Math.random() * 76;
-    const originY = 18 + Math.random() * 38;
+  // バースト数と粒子数を増やして演出を派手にする
+  for (let burstIndex = 0; burstIndex < 7; burstIndex += 1) {
+    const originX = 8 + Math.random() * 84;
+    const originY = 12 + Math.random() * 50;
 
-    for (let particleIndex = 0; particleIndex < 24; particleIndex += 1) {
+    for (let particleIndex = 0; particleIndex < 42; particleIndex += 1) {
       const particle = document.createElement("span");
       particle.className = "firework-particle";
 
       const angle = Math.random() * Math.PI * 2;
-      const distance = 90 + Math.random() * 140;
+      const distance = 120 + Math.random() * 220;
       const dx = Math.cos(angle) * distance;
       const dy = Math.sin(angle) * distance;
-      const duration = 900 + Math.random() * 650;
+      const duration = 1200 + Math.random() * 900;
+      const size = 4 + Math.random() * 7;
 
       particle.style.left = `${originX}%`;
       particle.style.top = `${originY}%`;
       particle.style.setProperty("--dx", `${dx}px`);
       particle.style.setProperty("--dy", `${dy}px`);
       particle.style.setProperty("--duration", `${duration}ms`);
+      particle.style.setProperty("--size", `${size}px`);
       particle.style.background = colorPalette[Math.floor(Math.random() * colorPalette.length)];
+
+      // 一部の粒子を大きめにして目立つ花火にする
+      if (Math.random() > 0.78) {
+        particle.classList.add("firework-particle--large");
+      }
 
       layer.append(particle);
     }
@@ -168,7 +169,7 @@ function launchFireworks() {
   // アニメーション終了後にDOMから除去
   setTimeout(() => {
     layer.remove();
-  }, 1900);
+  }, 2600);
 }
 
 // 保存して再描画する共通処理
