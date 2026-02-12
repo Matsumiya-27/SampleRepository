@@ -5,18 +5,38 @@ const list = document.getElementById("todo-list");
 const clearCompletedButton = document.getElementById("clear-completed");
 const filterButtons = document.querySelectorAll(".filter-btn");
 const pointsValue = document.getElementById("points-value");
-const launchFireworksButton = document.getElementById("launch-fireworks");
+const openShopButton = document.getElementById("open-shop");
+
+// ポイントショップ用DOM
+const shopModal = document.getElementById("shop-modal");
+const closeShopButton = document.getElementById("close-shop");
+const shopLevelValue = document.getElementById("shop-level-value");
+const shopNextCostValue = document.getElementById("shop-next-cost-value");
+const shopUpgradeButton = document.getElementById("shop-upgrade");
+
+// デバッグポイント追加用DOM
+const debugModal = document.getElementById("debug-modal");
+const closeDebugButton = document.getElementById("close-debug");
+const debugPointsInput = document.getElementById("debug-points");
+const debugAddButton = document.getElementById("debug-add-points");
 
 // localStorageで使うキー
 const STORAGE_KEY = "simple-todo-items";
 const POINTS_STORAGE_KEY = "simple-todo-points";
+const FIREWORK_POWER_STORAGE_KEY = "simple-todo-firework-power";
 
 // 表示中のフィルター状態（all / active / completed）
 let currentFilter = "all";
 
-// 初期表示: 保存済みTODOとポイントを読み込み、描画
+// 花火の基本設定
+const FIREWORK_TICK_MS = 500;
+const FIREWORK_BURSTS_PER_TICK = 3;
+const FIREWORK_TICKS = 5;
+
+// 初期表示: 保存済みTODO・ポイント・花火強化レベルを読み込み、描画
 let todos = loadTodos();
 let points = loadPoints();
+let fireworkPowerLevel = loadFireworkPowerLevel();
 render();
 
 // TODO追加
@@ -28,11 +48,17 @@ form.addEventListener("submit", (event) => {
     return;
   }
 
+  // debugcommand でポイント加算デバッグ画面を開く
+  if (text.toLowerCase() === "debugcommand") {
+    input.value = "";
+    openDebugModal();
+    return;
+  }
+
   todos.unshift({
     id: crypto.randomUUID(),
     text,
     completed: false,
-    rewarded: false,
   });
 
   input.value = "";
@@ -45,27 +71,70 @@ clearCompletedButton.addEventListener("click", () => {
   const hadTodos = todos.length > 0;
   const wereAllCompleted = hadTodos && todos.every((todo) => todo.completed);
 
-  const remainingTodos = todos.filter((todo) => !todo.completed);
-  const removedCount = todos.length - remainingTodos.length;
-  todos = remainingTodos;
+  const completedCount = todos.filter((todo) => todo.completed).length;
+  todos = todos.filter((todo) => !todo.completed);
+
+  // ポイント獲得タイミングを「完了を削除した時」に変更
+  if (completedCount > 0) {
+    points += completedCount;
+  }
 
   persistAndRender();
 
   // 「全件完了→完了を削除できた」タイミングで花火を打ち上げる
-  if (wereAllCompleted && removedCount > 0) {
+  if (wereAllCompleted && completedCount > 0) {
     launchFireworksSequence();
   }
 });
 
-// ポイントを消費して花火を打ち上げる
-launchFireworksButton.addEventListener("click", () => {
-  if (points < 1) {
+// ポイントショップを開く
+openShopButton.addEventListener("click", () => {
+  openShopModal();
+});
+
+closeShopButton.addEventListener("click", () => {
+  closeShopModal();
+});
+
+shopUpgradeButton.addEventListener("click", () => {
+  const cost = getNextUpgradeCost();
+  if (points < cost) {
     return;
   }
 
-  points -= 1;
+  points -= cost;
+  fireworkPowerLevel += 1;
   persistAndRender();
-  launchFireworksSequence();
+  syncShopView();
+});
+
+// デバッグポイント加算画面
+closeDebugButton.addEventListener("click", () => {
+  closeDebugModal();
+});
+
+debugAddButton.addEventListener("click", () => {
+  const amount = Number.parseInt(debugPointsInput.value, 10);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    return;
+  }
+
+  points += amount;
+  persistAndRender();
+  closeDebugModal();
+});
+
+// モーダル背景クリックで閉じる
+shopModal.addEventListener("click", (event) => {
+  if (event.target === shopModal) {
+    closeShopModal();
+  }
+});
+
+debugModal.addEventListener("click", (event) => {
+  if (event.target === debugModal) {
+    closeDebugModal();
+  }
 });
 
 // フィルターボタンのクリックで、表示対象を切り替える
@@ -109,15 +178,7 @@ function render() {
     checkbox.type = "checkbox";
     checkbox.checked = todo.completed;
     checkbox.addEventListener("change", () => {
-      const wasCompleted = todo.completed;
       todo.completed = checkbox.checked;
-
-      // 未完了→完了になった時だけ1ポイント付与（1タスクにつき1回）
-      if (!wasCompleted && todo.completed && !todo.rewarded) {
-        points += 1;
-        todo.rewarded = true;
-      }
-
       persistAndRender();
     });
 
@@ -140,7 +201,7 @@ function render() {
   }
 
   pointsValue.textContent = String(points);
-  launchFireworksButton.disabled = points < 1;
+  syncShopView();
 }
 
 // フィルターボタンの見た目（activeクラス）を同期する
@@ -151,23 +212,56 @@ function updateFilterButtonState() {
   }
 }
 
-// 3秒おきに2発ずつ、合計6発の花火を打ち上げる
+// ショップ表示を現在のポイント/強化レベルに同期
+function syncShopView() {
+  const nextCost = getNextUpgradeCost();
+  shopLevelValue.textContent = String(fireworkPowerLevel);
+  shopNextCostValue.textContent = String(nextCost);
+  shopUpgradeButton.disabled = points < nextCost;
+}
+
+// 次の強化コストを算出
+function getNextUpgradeCost() {
+  return 3 + fireworkPowerLevel * 2;
+}
+
+// ポイントショップを開く
+function openShopModal() {
+  syncShopView();
+  shopModal.hidden = false;
+}
+
+function closeShopModal() {
+  shopModal.hidden = true;
+}
+
+// デバッグ画面を開く
+function openDebugModal() {
+  debugPointsInput.value = "10";
+  debugModal.hidden = false;
+}
+
+function closeDebugModal() {
+  debugModal.hidden = true;
+}
+
+// 0.5秒おきに3発ずつ花火を打ち上げる
 function launchFireworksSequence() {
   const layer = createFireworksLayer();
-  const rounds = 3;
 
-  for (let round = 0; round < rounds; round += 1) {
-    const delay = round * 3000;
+  for (let tick = 0; tick < FIREWORK_TICKS; tick += 1) {
+    const delay = tick * FIREWORK_TICK_MS;
     setTimeout(() => {
-      launchFireworkBurst(layer);
-      launchFireworkBurst(layer);
+      for (let burst = 0; burst < FIREWORK_BURSTS_PER_TICK; burst += 1) {
+        launchFireworkBurst(layer);
+      }
     }, delay);
   }
 
   // 最後の花火のアニメーションが終わる頃に片付ける
   setTimeout(() => {
     layer.remove();
-  }, rounds * 3000 + 2600);
+  }, FIREWORK_TICKS * FIREWORK_TICK_MS + 3200 + fireworkPowerLevel * 150);
 }
 
 // 花火レイヤーを作る
@@ -182,18 +276,22 @@ function createFireworksLayer() {
 function launchFireworkBurst(layer) {
   const colorPalette = ["#f472b6", "#22d3ee", "#facc15", "#34d399", "#a78bfa", "#fb7185", "#fb923c"];
   const originX = 8 + Math.random() * 84;
-  const originY = 12 + Math.random() * 50;
+  const originY = 10 + Math.random() * 54;
 
-  for (let particleIndex = 0; particleIndex < 42; particleIndex += 1) {
+  // 花火強化レベルが上がるほど粒子が増え、飛距離も伸びる
+  const particleCount = 38 + fireworkPowerLevel * 12;
+  const distanceBoost = fireworkPowerLevel * 20;
+
+  for (let particleIndex = 0; particleIndex < particleCount; particleIndex += 1) {
     const particle = document.createElement("span");
     particle.className = "firework-particle";
 
     const angle = Math.random() * Math.PI * 2;
-    const distance = 120 + Math.random() * 220;
+    const distance = 120 + Math.random() * (220 + distanceBoost);
     const dx = Math.cos(angle) * distance;
     const dy = Math.sin(angle) * distance;
-    const duration = 1200 + Math.random() * 900;
-    const size = 4 + Math.random() * 7;
+    const duration = 1050 + Math.random() * (850 + fireworkPowerLevel * 90);
+    const size = 4 + Math.random() * (7 + fireworkPowerLevel * 0.8);
 
     particle.style.left = `${originX}%`;
     particle.style.top = `${originY}%`;
@@ -204,7 +302,7 @@ function launchFireworkBurst(layer) {
     particle.style.background = colorPalette[Math.floor(Math.random() * colorPalette.length)];
 
     // 一部の粒子を大きめにして目立つ花火にする
-    if (Math.random() > 0.78) {
+    if (Math.random() > 0.72) {
       particle.classList.add("firework-particle--large");
     }
 
@@ -216,6 +314,7 @@ function launchFireworkBurst(layer) {
 function persistAndRender() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
   localStorage.setItem(POINTS_STORAGE_KEY, String(points));
+  localStorage.setItem(FIREWORK_POWER_STORAGE_KEY, String(fireworkPowerLevel));
   render();
 }
 
@@ -246,7 +345,6 @@ function loadTodos() {
         id: todo.id,
         text: todo.text,
         completed: todo.completed,
-        rewarded: typeof todo.rewarded === "boolean" ? todo.rewarded : Boolean(todo.completed),
       }));
   } catch {
     return [];
@@ -256,6 +354,17 @@ function loadTodos() {
 // localStorageからポイントを読み込む
 function loadPoints() {
   const raw = localStorage.getItem(POINTS_STORAGE_KEY);
+  const parsed = Number.parseInt(raw ?? "0", 10);
+  if (!Number.isFinite(parsed) || parsed < 0) {
+    return 0;
+  }
+
+  return parsed;
+}
+
+// localStorageから花火強化レベルを読み込む
+function loadFireworkPowerLevel() {
+  const raw = localStorage.getItem(FIREWORK_POWER_STORAGE_KEY);
   const parsed = Number.parseInt(raw ?? "0", 10);
   if (!Number.isFinite(parsed) || parsed < 0) {
     return 0;

@@ -32,10 +32,34 @@
 
       <div class="actions">
         <p class="points">ポイント: <span id="points-value">0</span>pt</p>
-        <button id="launch-fireworks" type="button">1ptで花火を打ち上げる</button>
+        <button id="open-shop" type="button">ポイントショップを開く</button>
         <button id="clear-completed" type="button">完了を削除</button>
       </div>
     </main>
+
+    <div id="shop-modal" class="modal" hidden>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-label="ポイントショップ">
+        <h2>ポイントショップ</h2>
+        <p>現在の花火パワー: Lv.<span id="shop-level-value">0</span></p>
+        <p>次の強化コスト: <span id="shop-next-cost-value">3</span>pt</p>
+        <div class="modal-actions">
+          <button id="shop-upgrade" type="button">花火をパワーアップ</button>
+          <button id="close-shop" type="button" class="secondary">閉じる</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="debug-modal" class="modal" hidden>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-label="デバッグポイント加算">
+        <h2>デバッグポイント加算</h2>
+        <label class="debug-label" for="debug-points">加算ポイント</label>
+        <input id="debug-points" type="number" min="1" step="1" value="10" />
+        <div class="modal-actions">
+          <button id="debug-add-points" type="button">ポイント加算</button>
+          <button id="close-debug" type="button" class="secondary">閉じる</button>
+        </div>
+      </section>
+    </div>
 
     <script src="app.js"></script>
   </body>

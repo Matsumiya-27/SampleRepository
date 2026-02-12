@@ -186,7 +186,7 @@ button:active {
   font-size: 1.1em;
 }
 
-#launch-fireworks:disabled {
+#shop-upgrade:disabled {
   opacity: 0.55;
   filter: grayscale(0.15);
   cursor: not-allowed;
@@ -196,6 +196,72 @@ button:active {
 #clear-completed {
   background: linear-gradient(135deg, #f59e0b, #f97316);
   box-shadow: 0 6px 12px rgba(249, 115, 22, 0.24);
+}
+
+
+
+#open-shop {
+  background: linear-gradient(135deg, #6366f1, #14b8a6);
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.24);
+}
+
+.modal[hidden] {
+  display: none;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 23, 42, 0.42);
+  z-index: 40;
+  padding: 20px;
+}
+
+.modal-panel {
+  width: min(420px, 92vw);
+  background: rgba(255, 255, 255, 0.96);
+  border-radius: 18px;
+  border: 1px solid rgba(196, 181, 253, 0.55);
+  box-shadow: 0 18px 30px rgba(76, 29, 149, 0.22);
+  padding: 20px;
+}
+
+.modal-panel h2 {
+  margin: 0 0 10px;
+  color: #6d28d9;
+}
+
+.modal-panel p {
+  margin: 8px 0;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.secondary {
+  background: linear-gradient(135deg, #94a3b8, #64748b);
+  box-shadow: 0 6px 12px rgba(71, 85, 105, 0.24);
+}
+
+.debug-label {
+  display: block;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+#debug-points {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid #c4b5fd;
 }
 
 
@@ -297,6 +363,27 @@ button:active {
     background: rgba(17, 24, 39, 0.72);
     border-color: rgba(167, 139, 250, 0.5);
     color: #ddd6fe;
+  }
+
+
+  .modal {
+    background: rgba(2, 6, 23, 0.62);
+  }
+
+  .modal-panel {
+    background: rgba(17, 24, 39, 0.95);
+    border-color: rgba(167, 139, 250, 0.45);
+    color: #e5e7eb;
+  }
+
+  .modal-panel h2 {
+    color: #c4b5fd;
+  }
+
+  #debug-points {
+    background: rgba(15, 23, 42, 0.92);
+    border-color: #6d28d9;
+    color: #f9fafb;
   }
 
   #todo-input,
