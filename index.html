@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TheSimplestTODOAPPLICATION</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>TODO</h1>
+      <p>これはToDoアプリケーションです。</p>
+
+      <form id="todo-form" class="todo-form">
+        <input
+          id="todo-input"
+          type="text"
+          placeholder="やることを入力"
+          autocomplete="off"
+          required
+        />
+        <button type="submit">追加</button>
+      </form>
+
+      <div class="filters" role="tablist" aria-label="TODOフィルター">
+        <button type="button" class="filter-btn active" data-filter="all">すべて</button>
+        <button type="button" class="filter-btn" data-filter="active">未完了</button>
+        <button type="button" class="filter-btn" data-filter="completed">完了</button>
+      </div>
+
+      <ul id="todo-list" class="todo-list" aria-label="TODOリスト"></ul>
+
+      <div class="actions">
+        <p class="points">ポイント: <span id="points-value">0</span>pt</p>
+        <button id="open-shop" type="button">ポイントショップを開く</button>
+        <button id="clear-completed" type="button">完了を削除</button>
+      </div>
+    </main>
+
+    <div id="shop-modal" class="modal" hidden>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-label="ポイントショップ">
+        <h2>ポイントショップ</h2>
+        <p>現在の花火パワー: Lv.<span id="shop-level-value">0</span></p>
+        <p>次の強化コスト: <span id="shop-next-cost-value">3</span>pt</p>
+        <div class="modal-actions">
+          <button id="shop-upgrade" type="button">花火をパワーアップ</button>
+          <button id="close-shop" type="button" class="secondary">閉じる</button>
+        </div>
+      </section>
+    </div>
+
+    <div id="debug-modal" class="modal" hidden>
+      <section class="modal-panel" role="dialog" aria-modal="true" aria-label="デバッグポイント加算">
+        <h2>デバッグポイント加算</h2>
+        <label class="debug-label" for="debug-points">加算ポイント</label>
+        <input id="debug-points" type="number" min="1" step="1" value="10" />
+        <div class="modal-actions">
+          <button id="debug-add-points" type="button">ポイント加算</button>
+          <button id="close-debug" type="button" class="secondary">閉じる</button>
+        </div>
+      </section>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
