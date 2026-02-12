@@ -167,6 +167,30 @@ button:active {
 .actions {
   display: flex;
   justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.points {
+  margin: 0 auto 0 0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  font-weight: 700;
+  color: #7c3aed;
+}
+
+#points-value {
+  font-size: 1.1em;
+}
+
+#launch-fireworks:disabled {
+  opacity: 0.55;
+  filter: grayscale(0.15);
+  cursor: not-allowed;
+  transform: none;
 }
 
 #clear-completed {
@@ -266,6 +290,13 @@ button:active {
 
   h1 + p {
     color: #d1d5db;
+  }
+
+
+  .points {
+    background: rgba(17, 24, 39, 0.72);
+    border-color: rgba(167, 139, 250, 0.5);
+    color: #ddd6fe;
   }
 
   #todo-input,
