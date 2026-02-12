@@ -13,11 +13,29 @@ body {
   display: grid;
   place-items: center;
   padding: 20px;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fff7f0 0%, #f2f6ff 48%, #fef6ff 100%);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: -35vmax;
+  z-index: -1;
   background:
-    radial-gradient(circle at 12% 20%, #ffd6f5 0%, transparent 30%),
-    radial-gradient(circle at 88% 18%, #bde0fe 0%, transparent 28%),
-    radial-gradient(circle at 78% 88%, #caffbf 0%, transparent 30%),
-    linear-gradient(135deg, #fff7f0 0%, #f2f6ff 48%, #fef6ff 100%);
+    conic-gradient(from 0deg,
+      rgba(255, 105, 180, 0.35),
+      rgba(59, 130, 246, 0.33),
+      rgba(16, 185, 129, 0.32),
+      rgba(251, 191, 36, 0.32),
+      rgba(168, 85, 247, 0.35),
+      rgba(255, 105, 180, 0.35)
+    ),
+    radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.55) 0%, rgba(255, 255, 255, 0) 52%);
+  filter: blur(24px) saturate(1.15);
+  transform-origin: center;
+  animation: rotate-colors 18s linear infinite;
 }
 
 .container {
@@ -156,13 +174,32 @@ button:active {
   box-shadow: 0 6px 12px rgba(249, 115, 22, 0.24);
 }
 
+
+@keyframes rotate-colors {
+  from {
+    transform: rotate(0deg) scale(1.05);
+  }
+
+  to {
+    transform: rotate(360deg) scale(1.05);
+  }
+}
 @media (prefers-color-scheme: dark) {
   body {
+    background: linear-gradient(140deg, #0f172a 0%, #111827 55%, #1f1147 100%);
+  }
+
+  body::before {
     background:
-      radial-gradient(circle at 12% 20%, rgba(168, 85, 247, 0.25) 0%, transparent 34%),
-      radial-gradient(circle at 88% 18%, rgba(14, 165, 233, 0.25) 0%, transparent 34%),
-      radial-gradient(circle at 78% 88%, rgba(16, 185, 129, 0.22) 0%, transparent 34%),
-      linear-gradient(140deg, #0f172a 0%, #111827 55%, #1f1147 100%);
+      conic-gradient(from 0deg,
+        rgba(168, 85, 247, 0.32),
+        rgba(14, 165, 233, 0.3),
+        rgba(16, 185, 129, 0.28),
+        rgba(244, 114, 182, 0.28),
+        rgba(168, 85, 247, 0.32)
+      ),
+      radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 0.35) 0%, rgba(15, 23, 42, 0) 56%);
+    filter: blur(28px) saturate(1.1);
   }
 
   .container {
